@@ -9,6 +9,8 @@ import Tab from '@material-ui/core/Tab'
 
 import Button from '@material-ui/core/Button'
 import { Link } from 'react-router-dom'
+import Menu from '@material-ui/core/Menu'
+import MenuItem from '@material-ui/core/MenuItem'
 
 import logo from '../../assets/logo.svg'
 
@@ -52,6 +54,18 @@ const useStyles = makeStyles(theme => ({
         '&:hover': {
             backgroundColor: 'transparent'
         }
+    },
+    menu: {
+        backgroundColor: theme.palette.common.arcBlue,
+        color: 'white',
+        borderRadius: 0
+    },
+    menuItem: {
+        ...theme.typography.tab,
+        opacity: 0.7,
+        '&:hover': {
+            'opacity': 1
+        }
     }
 }))
 
@@ -59,12 +73,38 @@ const useStyles = makeStyles(theme => ({
 export default function Header(props) {
     const classes = useStyles()
     const [value, setValue] = useState(0)
+    const [anchorEl, setAnchorEl] = useState(null)
+    const [open, setOpen] = useState(false)
+    const [selectedIndex, setSelectedIndex] = useState(0)
 
     const handleChange = (e, value) => {
         setValue(value)
     }
 
-    // a user effect to highlight the active menu on the page
+    const handleMenuItemClick = (e, index) => {
+        setAnchorEl(null)
+        setOpen(false)
+        setSelectedIndex(index)
+    }
+
+    const handleClick = (e) => {
+        setAnchorEl(e.currentTarget)
+        setOpen(true)
+    }
+
+    const handleClose = (e) => {
+        setAnchorEl(null)
+        setOpen(false)
+    }
+
+    const menuOptions = [
+        { name: 'Services', link: '/services' },
+        { name: 'Custom Software Development', link: '/customsoftware' },
+        { name: 'Mobile App Development', link: '/mobileapps' },
+        { name: 'Website Development', link: '/websites' },
+    ]
+
+    // a use effect to highlight the active menu on the page
     // use one use effect for one particular thing? 
     useEffect(() => {
         // code we want to run anytime a component updates
@@ -100,7 +140,11 @@ export default function Header(props) {
                         </Button>
                         <Tabs onChange={handleChange} value={value} className={classes.tabContainer} >
                             <Tab component={Link} to='/' className={classes.tab} label='Home' ></Tab>
-                            <Tab component={Link} to='/services' className={classes.tab} label='Services' ></Tab>
+                            <Tab
+                                aria-owns={anchorEl ? 'simple-menu' : undefined}
+                                aria-haspopup={anchorEl ? 'true' : undefined}
+                                onMouseOver={(event) => handleClick(event)}
+                                component={Link} to='/services' className={classes.tab} label='Services' ></Tab>
                             <Tab component={Link} to='/revolution' className={classes.tab} label='Revolution' ></Tab>
                             <Tab component={Link} to='/about' className={classes.tab} label='About Us' ></Tab>
                             <Tab component={Link} to='/contact' className={classes.tab} label='Contact Us' ></Tab>
@@ -108,6 +152,27 @@ export default function Header(props) {
                         <Button variant='contained' color='secondary' className={classes.button} >
                             Free Estimate
                         </Button>
+                        <Menu id='simple-menu' anchorEl={anchorEl}
+                            open={open} onClose={handleClose}
+                            classes={{ paper: classes.menu }}
+                            MenuListProps={{ onMouseLeave: handleClose }}
+                            elevation={0}
+                        >
+                            {
+                                menuOptions.map((option, index) => {
+                                    return <MenuItem
+                                        key={index}
+                                        onClick={(e) => { handleMenuItemClick(e, index); setValue(1); handleClose(); }}
+                                        component={Link}
+                                        classes={{ root: classes.menuItem }}
+                                        to={option.link}
+                                        selected={index === selectedIndex && value === 1}
+                                    >
+                                        {option.name}
+                                    </MenuItem>
+                                })
+                            }
+                        </Menu>
                     </Toolbar>
                 </AppBar>
             </ElevationScroll>
