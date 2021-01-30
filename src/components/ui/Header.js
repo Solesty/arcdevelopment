@@ -97,7 +97,7 @@ const useStyles = makeStyles(theme => ({
         }
     },
     drawer: {
-        backgroundColor: theme.palette.common.arcBlue
+        backgroundColor: theme.palette.common.arcBlue,
     },
     drawerItem: {
         ...theme.typography.tab,
@@ -108,7 +108,12 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.common.arcOrange
     },
     drawItemSelected: {
-        opacity: 1
+        '& .MuiListItemText-root': {
+            opacity: 1
+        },
+    },
+    appBar: {
+        zIndex: theme.zIndex.modal + 1
     }
 }))
 
@@ -154,7 +159,12 @@ export default function Header(props) {
     ]
     const routes = [
         { name: 'Home', link: '/', activeIndex: 0 },
-        { name: 'Services', link: '/services', activeIndex: 1 },
+        {
+            name: 'Services', link: '/services', activeIndex: 1,
+            ariaOwns: anchorEl ? 'simple-menu' : undefined,
+            ariaPopup: anchorEl ? 'true' : undefined,
+            mouseOver: (event) => handleClick(event)
+        },
         { name: 'Revolution', link: '/revolution', activeIndex: 2 },
         { name: 'About Us', link: '/about', activeIndex: 3 },
         { name: 'Contact', link: '/contact', activeIndex: 4 },
@@ -170,7 +180,7 @@ export default function Header(props) {
                 case `${route.link}`:
                     if (value !== route.activeIndex) {
                         // check the current url and set the approviate value
-                        setValue(route.activeIndexi)
+                        setValue(route.activeIndex)
                         if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
                             setSelectedIndex(route.selectedIndex)
                         }
@@ -187,15 +197,15 @@ export default function Header(props) {
     const tabs = (
         <React.Fragment>
             <Tabs onChange={handleChange} value={value} className={classes.tabContainer} >
-                <Tab component={Link} to='/' className={classes.tab} label='Home' ></Tab>
-                <Tab
-                    aria-owns={anchorEl ? 'simple-menu' : undefined}
-                    aria-haspopup={anchorEl ? 'true' : undefined}
-                    onMouseOver={(event) => handleClick(event)}
-                    component={Link} to='/services' className={classes.tab} label='Services' ></Tab>
-                <Tab component={Link} to='/revolution' className={classes.tab} label='Revolution' ></Tab>
-                <Tab component={Link} to='/about' className={classes.tab} label='About Us' ></Tab>
-                <Tab component={Link} to='/contact' className={classes.tab} label='Contact Us' ></Tab>
+                {
+                    routes.map((route, index) => {
+                        return <Tab key={`route${index}`} component={Link} to={route.link} className={classes.tab} label={route.name}
+                            aria-owns={route.ariaOwns}
+                            aria-haspopup={route.ariaPopup}
+                            onMouseOver={route.mouseOver}
+                        ></Tab>
+                    })
+                }
             </Tabs>
             <Button variant='contained' color='secondary' className={classes.button} >
                 Free Estimate
@@ -203,13 +213,15 @@ export default function Header(props) {
             <Menu id='simple-menu' anchorEl={anchorEl}
                 open={openMenu} onClose={handleClose}
                 classes={{ paper: classes.menu }}
+                style={{ zIndex: 1302 }}
                 MenuListProps={{ onMouseLeave: handleClose }}
                 elevation={0}
+                keepMounted
             >
                 {
                     menuOptions.map((option, index) => {
                         return <MenuItem
-                            key={index}
+                            key={`${option}${index}`}
                             onClick={(e) => { handleMenuItemClick(e, index); setValue(1); handleClose(); }}
                             component={Link}
                             classes={{ root: classes.menuItem }}
@@ -230,24 +242,25 @@ export default function Header(props) {
                 open={openDrawer} onOpen={() => setOpenDrawer(true)} onClose={() => setOpenDrawer(false)}
                 classes={{ paper: classes.drawer }}
             >
+                <div className={classes.toolbarMargin} ></div>
                 <List disablePadding >
-                    <ListItem onClick={() => { setOpenDrawer(false); setValue(0) }} divider button component={Link} to='/' selected={value === 0} >
-                        <ListItemText className={value === 0 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Home</ListItemText>
-                    </ListItem>
-                    <ListItem onClick={() => { setOpenDrawer(false); setValue(1) }} divider button component={Link} to='/services' selected={value === 1} >
-                        <ListItemText className={value === 1 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Services</ListItemText>
-                    </ListItem>
-                    <ListItem onClick={() => { setOpenDrawer(false); setValue(2) }} divider button component={Link} to='/revolution' selected={value === 2} >
-                        <ListItemText className={value === 2 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Revolution</ListItemText>
-                    </ListItem>
-                    <ListItem onClick={() => { setOpenDrawer(false); setValue(3) }} divider button component={Link} to='/about' selected={value === 3} >
-                        <ListItemText className={value === 3 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >About Us</ListItemText>
-                    </ListItem>
-                    <ListItem onClick={() => { setOpenDrawer(false); setValue(4) }} divider button component={Link} to='/contact' selected={value === 4} >
-                        <ListItemText className={value === 4 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Contact Us</ListItemText>
-                    </ListItem>
-                    <ListItem className={classes.drawItemEstimate} onClick={() => { setOpenDrawer(false); setValue(5) }} divider button component={Link} to='/estimate' selected={value === 5} >
-                        <ListItemText className={value === 5 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Free Estimate</ListItemText>
+                    {
+                        routes.map((route, index) => {
+                            return <ListItem
+                                key={`route${route.activeIndex}`}
+                                onClick={() => { setOpenDrawer(false); setValue(route.activeIndex) }}
+                                divider button
+                                component={Link}
+                                to={route.link}
+                                selected={value === route.activeIndex}
+                                classes={{ selected: classes.drawerItemSelected }}
+                            >
+                                <ListItemText className={classes.drawerItem} disableTypography >{route.name}</ListItemText>
+                            </ListItem>
+                        })
+                    }
+                    <ListItem className={{ root: classes.drawItemEstimate, selected: classes.drawerItemSelected }} onClick={() => { setOpenDrawer(false); setValue(5) }} divider button component={Link} to='/estimate' selected={value === 5} >
+                        <ListItemText className={classes.drawerItem} disableTypography >Free Estimate</ListItemText>
                     </ListItem>
                 </List>
             </SwipeableDrawer>
@@ -259,7 +272,7 @@ export default function Header(props) {
     return (
         <React.Fragment>
             <ElevationScroll>
-                <AppBar position='fixed' color='primary' >
+                <AppBar position='fixed' color='primary' className={classes.appBar} >
                     {/* disableGutters remove padding around the component */}
                     <Toolbar disableGutters  >
                         <Button
