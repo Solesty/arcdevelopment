@@ -15,6 +15,9 @@ import useMediaQuery from '@material-ui/core/useMediaQuery'
 import { useTheme } from '@material-ui/core/styles'
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
 import MenuIcon from '@material-ui/icons/Menu'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
 
 import logo from '../../assets/logo.svg'
 import { IconButton } from '@material-ui/core';
@@ -92,6 +95,20 @@ const useStyles = makeStyles(theme => ({
         '&;hover': {
             backgroundColor: 'transparent',
         }
+    },
+    drawer: {
+        backgroundColor: theme.palette.common.arcBlue
+    },
+    drawerItem: {
+        ...theme.typography.tab,
+        color: 'white',
+        opacity: 0.7
+    },
+    drawItemEstimate: {
+        backgroundColor: theme.palette.common.arcOrange
+    },
+    drawItemSelected: {
+        opacity: 1
     }
 }))
 
@@ -130,10 +147,17 @@ export default function Header(props) {
     }
 
     const menuOptions = [
-        { name: 'Services', link: '/services' },
-        { name: 'Custom Software Development', link: '/customsoftware' },
-        { name: 'Mobile App Development', link: '/mobileapps' },
-        { name: 'Website Development', link: '/websites' },
+        { name: 'Services', link: '/services', activeIndex: 1, selectedIndex: 0 },
+        { name: 'Custom Software Development', link: '/customsoftware', activeIndex: 1, selectedIndex: 1 },
+        { name: 'Mobile App Development', link: '/mobileapps', activeIndex: 1, selectedIndex: 3 },
+        { name: 'Website Development', link: '/websites', activeIndex: 1, selectedIndex: 4 },
+    ]
+    const routes = [
+        { name: 'Home', link: '/', activeIndex: 0 },
+        { name: 'Services', link: '/services', activeIndex: 1 },
+        { name: 'Revolution', link: '/revolution', activeIndex: 2 },
+        { name: 'About Us', link: '/about', activeIndex: 3 },
+        { name: 'Contact', link: '/contact', activeIndex: 4 },
     ]
 
     // a use effect to highlight the active menu on the page
@@ -141,76 +165,24 @@ export default function Header(props) {
     useEffect(() => {
         // code we want to run anytime a component updates
 
-        // check the current url and set the approviate value
-        if (window.location.pathname === '/' && value !== 0) {
-            setValue(0)
-        } else if (window.location.pathname === '/services' && value !== 1) {
-            setValue(1)
-        } else if (window.location.pathname === '/revolution' && value !== 2) {
-            setValue(2)
-        } else if (window.location.pathname === '/about' && value !== 3) {
-            setValue(3)
-        } else if (window.location.pathname === '/contact' && value !== 4) {
-            setValue(4)
-        } else if (window.location.pathname === '/estimate' && value !== 5) {
-            setValue(5)
-        }
+        [...menuOptions, ...routes].forEach((route => {
+            switch (window.location.pathname) {
+                case `${route.link}`:
+                    if (value !== route.activeIndex) {
+                        // check the current url and set the approviate value
+                        setValue(route.activeIndexi)
+                        if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
+                            setSelectedIndex(route.selectedIndex)
+                        }
+                    }
+                    break
+                default:
+                    break
+            }
+        }))
 
-        switch (window.location.pathname) {
-            case '/':
-                if (value !== 0) {
-                    setValue(0)
-                }
-                break;
-            case '/services':
-                if (value !== 1) {
-                    setValue(1)
-                    setSelectedIndex(0)
-                }
-                break;
-            case '/customsoftware':
-                if (value !== 1) {
-                    setValue(1)
-                    setSelectedIndex(1)
-                }
-                break;
-            case '/mobileapps':
-                if (value !== 1) {
-                    setValue(1)
-                    setSelectedIndex(2)
-                }
-                break;
-            case '/websites':
-                if (value !== 1) {
-                    setValue(1)
-                    setSelectedIndex(3)
-                }
-                break;
-            case '/revolution':
-                if (value !== 2) {
-                    setValue(2)
-                }
-                break;
-            case '/about':
-                if (value !== 3) {
-                    setValue(3)
-                }
-                break;
-            case '/contact':
-                if (value !== 4) {
-                    setValue(4)
-                }
-                break;
-            case '/estimate':
-                if (value !== 5) {
-                    setValue(5)
-                }
-                break;
-            default:
-                break;
-        }
 
-    }, [value]) // we are depending on this state value
+    }, [value, menuOptions, selectedIndex, routes]) // we are depending on this state value
 
     const tabs = (
         <React.Fragment>
@@ -253,8 +225,31 @@ export default function Header(props) {
     )
     const drawer = (
         <React.Fragment>
-            <SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} open={openDrawer} onOpen={() => setOpenDrawer(true)} onClose={() => setOpenDrawer(false)} >
-                Example Drawer
+            <SwipeableDrawer disableBackdropTransition={!iOS}
+                disableDiscovery={iOS}
+                open={openDrawer} onOpen={() => setOpenDrawer(true)} onClose={() => setOpenDrawer(false)}
+                classes={{ paper: classes.drawer }}
+            >
+                <List disablePadding >
+                    <ListItem onClick={() => { setOpenDrawer(false); setValue(0) }} divider button component={Link} to='/' selected={value === 0} >
+                        <ListItemText className={value === 0 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Home</ListItemText>
+                    </ListItem>
+                    <ListItem onClick={() => { setOpenDrawer(false); setValue(1) }} divider button component={Link} to='/services' selected={value === 1} >
+                        <ListItemText className={value === 1 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Services</ListItemText>
+                    </ListItem>
+                    <ListItem onClick={() => { setOpenDrawer(false); setValue(2) }} divider button component={Link} to='/revolution' selected={value === 2} >
+                        <ListItemText className={value === 2 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Revolution</ListItemText>
+                    </ListItem>
+                    <ListItem onClick={() => { setOpenDrawer(false); setValue(3) }} divider button component={Link} to='/about' selected={value === 3} >
+                        <ListItemText className={value === 3 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >About Us</ListItemText>
+                    </ListItem>
+                    <ListItem onClick={() => { setOpenDrawer(false); setValue(4) }} divider button component={Link} to='/contact' selected={value === 4} >
+                        <ListItemText className={value === 4 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Contact Us</ListItemText>
+                    </ListItem>
+                    <ListItem className={classes.drawItemEstimate} onClick={() => { setOpenDrawer(false); setValue(5) }} divider button component={Link} to='/estimate' selected={value === 5} >
+                        <ListItemText className={value === 5 ? [classes.drawItemSelected, classes.drawerItem] : classes.drawerItem} disableTypography >Free Estimate</ListItemText>
+                    </ListItem>
+                </List>
             </SwipeableDrawer>
             <IconButton onClick={() => setOpenDrawer(!openDrawer)} disableRipple className={classes.drawerIconContainer} >
                 <MenuIcon className={classes.drawIcon} />
