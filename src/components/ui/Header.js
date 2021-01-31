@@ -126,19 +126,17 @@ export default function Header(props) {
     const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
     const [openDrawer, setOpenDrawer] = useState(false)
 
-    const [value, setValue] = useState(0)
     const [anchorEl, setAnchorEl] = useState(null)
     const [openMenu, setOpenMenu] = useState(false)
-    const [selectedIndex, setSelectedIndex] = useState(0)
 
     const handleChange = (e, newValue) => {
-        setValue(newValue)
+        props.setValue(newValue)
     }
 
     const handleMenuItemClick = (e, index) => {
         setAnchorEl(null)
         setOpenMenu(false)
-        setSelectedIndex(index)
+        props.setSelectedIndex(index)
     }
 
     const handleClick = (e) => {
@@ -178,11 +176,11 @@ export default function Header(props) {
         [...menuOptions, ...routes].forEach((route => {
             switch (window.location.pathname) {
                 case `${route.link}`:
-                    if (value !== route.activeIndex) {
+                    if (props.value !== route.activeIndex) {
                         // check the current url and set the approviate value
-                        setValue(route.activeIndex)
-                        if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
-                            setSelectedIndex(route.selectedIndex)
+                        props.setValue(route.activeIndex)
+                        if (route.selectedIndex && route.selectedIndex !== props.selectedIndex) {
+                            props.setSelectedIndex(route.selectedIndex)
                         }
                     }
                     break
@@ -192,11 +190,11 @@ export default function Header(props) {
         }))
 
 
-    }, [value, menuOptions, selectedIndex, routes]) // we are depending on this state value
+    }, [props.value, menuOptions, props.selectedIndex, routes]) // we are depending on this state value
 
     const tabs = (
         <React.Fragment>
-            <Tabs onChange={handleChange} value={value} className={classes.tabContainer} >
+            <Tabs onChange={handleChange} value={props.value} className={classes.tabContainer} >
                 {
                     routes.map((route, index) => {
                         return <Tab key={`route${index}`} component={Link} to={route.link} className={classes.tab} label={route.name}
@@ -222,11 +220,11 @@ export default function Header(props) {
                     menuOptions.map((option, index) => {
                         return <MenuItem
                             key={`${option}${index}`}
-                            onClick={(e) => { handleMenuItemClick(e, index); setValue(1); handleClose(); }}
+                            onClick={(e) => { handleMenuItemClick(e, index); props.setValue(1); handleClose(); }}
                             component={Link}
                             classes={{ root: classes.menuItem }}
                             to={option.link}
-                            selected={index === selectedIndex && value === 1}
+                            selected={index === props.selectedIndex && props.value === 1}
                         >
                             {option.name}
                         </MenuItem>
@@ -248,18 +246,18 @@ export default function Header(props) {
                         routes.map((route, index) => {
                             return <ListItem
                                 key={`route${route.activeIndex}`}
-                                onClick={() => { setOpenDrawer(false); setValue(route.activeIndex) }}
+                                onClick={() => { setOpenDrawer(false); props.setValue(route.activeIndex) }}
                                 divider button
                                 component={Link}
                                 to={route.link}
-                                selected={value === route.activeIndex}
+                                selected={props.value === route.activeIndex}
                                 classes={{ selected: classes.drawerItemSelected }}
                             >
                                 <ListItemText className={classes.drawerItem} disableTypography >{route.name}</ListItemText>
                             </ListItem>
                         })
                     }
-                    <ListItem className={{ root: classes.drawItemEstimate, selected: classes.drawerItemSelected }} onClick={() => { setOpenDrawer(false); setValue(5) }} divider button component={Link} to='/estimate' selected={value === 5} >
+                    <ListItem className={{ root: classes.drawItemEstimate, selected: classes.drawerItemSelected }} onClick={() => { setOpenDrawer(false); props.setValue(5) }} divider button component={Link} to='/estimate' selected={props.value === 5} >
                         <ListItemText className={classes.drawerItem} disableTypography >Free Estimate</ListItemText>
                     </ListItem>
                 </List>
@@ -278,7 +276,7 @@ export default function Header(props) {
                         <Button
                             disableRipple
                             onClick={() => {
-                                setValue(0)
+                                props.setValue(0)
                             }} component={Link} to='/' className={classes.logoContainer} >
                             <img src={logo} alt='company logo' className={classes.logo} />
                         </Button>
